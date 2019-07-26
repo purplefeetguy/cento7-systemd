@@ -1,27 +1,13 @@
-FROM centos:latest
-
-MAINTAINER "purplefeetguy" <purplefeetguy@hotmail.com>
-
+FROM centos:7
 ENV container docker
-
-#RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-
-# normal updates, tools, nginx, cleanup
-RUN yum -y update \
- && yum -y install epel-release iproute crontabs \
-# && yum -y install nginx \
-&& yum -y clean all
-# && yum clean all \
-# && rm -rf /etc/localtime \
-# && ln -s /usr/share/zoneinfo/Europe/Berlin /etc/localtime
-
-EXPOSE 80
-EXPOSE 443
-
-# COPY config/nginx.conf /etc/nginx/
-
-#RUN systemctl enable nginx \
-# && systemctl enable crond
-RUN systemctl enable crond
-
+RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
+systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+rm -f /lib/systemd/system/multi-user.target.wants/*;\
+rm -f /etc/systemd/system/*.wants/*;\
+rm -f /lib/systemd/system/local-fs.target.wants/*; \
+rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+rm -f /lib/systemd/system/basic.target.wants/*;\
+rm -f /lib/systemd/system/anaconda.target.wants/*;
+VOLUME [ "/sys/fs/cgroup" ]
 CMD ["/usr/sbin/init"]
